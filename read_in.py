@@ -20,8 +20,8 @@ class Request:
 def read():
     V, E, R, C, X = map(int, input().split())
     videos = []
-    for i in range(V):
-        videos.append(Video(i, int(input())))
+    for i, s in enumerate(map(int, input().split())):
+        videos.append(Video(i, s))
     endpoints = []
     for i in range(E):
         Ld, K = map(int, input().split())

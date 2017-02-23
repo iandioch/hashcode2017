@@ -11,8 +11,13 @@ inputs = [
 
 main_file = sys.argv[1]
 
+if not os.path.exists('output'):
+    os.makedirs('output')
+else:
+    subprocess.call(['rm output/*'], shell=True)
+
 for in_file in inputs:
-    out_file = in_file.split('/')[1][:-2] + 'out'
+    out_file = 'output/' + in_file.split('/')[1][:-2] + 'out'
     command = ' '.join(["python3", main_file, "<", in_file, ">", out_file])
     print("Running:", command)
     return_code = subprocess.call([command], shell=True)

@@ -10,12 +10,40 @@ class Endpoint:
         self.num_cache = K
         # List of pairs: cache server ID, latency
         self.cache_lats = cache_lats
+        self.requests = []
+        # maps connected cache object to latency
+        self.caches = {}
+
+    def get_shortest_route_to(self, video_obj):
+        best = self.dc_lat
+        for cache in self.caches:
+            if video_obj.i in cache.vid_ids:
+                best = min(best, self.caches[cache])
+        return best
 
 class Request:
-    def __init__(self, i, endp, r):
+    def __init__(self, i, endp, r, video_obj):
         self.i = i
         self.endp_id = endp
         self.num_req = r
+        self.video = video_obj
+
+class Cache:
+    def __init__(self, i, meg, endpoints):
+        self.i = i
+        self.remaining = meg
+        self.vids = []
+        self.vid_ids = set()
+        self.connected = {}
+        for e in endpoints:
+            for k, v in e.cache_lats:
+                if k == self.i:
+                    self.connected[e.i] = v
+
+    def add_video(self, video_obj):
+        self.vids.append(video_obj)
+        self.vid_ids.add(video_obj.i)
+        self.remaining -= video_obj.meg
 
 def read():
     V, E, R, C, X = map(int, input().split())
@@ -32,5 +60,16 @@ def read():
     requests = []
     for i in range(R):
         Rv, Re, Rn = map(int, input().split())
-        requests.append(Request(Rv, Re, Rn))
-    return V, E, R, C, X, videos, endpoints, requests
+        r = Request(Rv, Re, Rn, videos[Rv])
+        requests.append(r)
+        endpoints[Re].requests.append(r)
+
+    # create cache objects
+    caches = []
+    for i in range(C):
+        caches.append(Cache(i, X, endpoints))
+    # build up (cache object: latency) dicts for each endpoint
+    for e in endpoints:
+        for c in e.cache_lats:
+            e.caches[caches[c[0]]] = c[1]
+    return V, E, R, C, X, videos, endpoints, requests, caches

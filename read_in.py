@@ -13,6 +13,10 @@ class Endpoint:
         self.requests = []
         # maps connected cache object to latency
         self.caches = {}
+        self.cached_vid_ids = set()
+
+    def mark_vid_as_cached(self, vid_id):
+        self.cached_vid_ids.add(vid_id)
 
     def sort_requests_by_most_pop_to_least(self, _already_called=False):
         if not _already_called:

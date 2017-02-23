@@ -14,12 +14,28 @@ class Endpoint:
         # maps connected cache object to latency
         self.caches = {}
 
+    def sort_requests_by_most_pop_to_least(self, _already_called=False):
+        if not _already_called:
+            self.requests = sorted(self.requests,
+                                   key=lambda r: r.num_req,
+                                   reverse=True)
+            _already_called = True
+
+    def get_caches_sorted_by_lowest_lat(self):
+        return sorted(self.caches, key=lambda c: self.caches[c])
+
     def get_shortest_route_to(self, video_obj):
         best = self.dc_lat
         for cache in self.caches:
             if video_obj.i in cache.vid_ids:
                 best = min(best, self.caches[cache])
         return best
+
+    def vid_has_cached_route(self, video_obj):
+        for cache in self.caches:
+            if video_obj.i in cache.vid_ids:
+                return True
+        return False
 
 class Request:
     def __init__(self, i, endp, r, video_obj):
@@ -39,6 +55,9 @@ class Cache:
             for k, v in e.cache_lats:
                 if k == self.i:
                     self.connected[e.i] = v
+
+    def vid_fits(self, vid):
+        return vid.meg <= self.remaining
 
     def add_video(self, video_obj):
         self.vids.append(video_obj)

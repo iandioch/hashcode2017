@@ -15,8 +15,8 @@ for in_file in inputs:
     out_file = in_file.split('/')[1][:-2] + 'out'
     command = ' '.join(["python3", main_file, "<", in_file, ">", out_file])
     print("Running:", command)
-    completed_process = subprocess.run([command], shell=True)
-    print(in_file, "STDERR:", completed_process.stderr)
+    return_code = subprocess.call([command], shell=True)
+    print(in_file, "return code:", return_code)
     print("-------")
 
 
@@ -27,4 +27,4 @@ for thing_in_dir in os.listdir('.'):
 
 print("Zipping:", ', '.join(source_paths))
 command = "zip source.zip " + ' '.join(source_paths)
-subprocess.run([command], shell=True)
+subprocess.call([command], shell=True)

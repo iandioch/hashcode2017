@@ -12,5 +12,6 @@ if __name__ == '__main__':
                         if cache.remaining >= r.video.meg:
                             cache.add_video(r.video)
                             break
+    print(len([c for c in caches if len(c.vids) > 0]))
     for cache in caches:
         print(cache.i, ' '.join([str(v.i) for v in cache.vids]))

@@ -18,6 +18,12 @@ class Endpoint:
     def mark_vid_as_cached(self, vid_id):
         self.cached_vid_ids.add(vid_id)
 
+    def num_req_for_vid(self, vid_id):
+        for req in self.requests:
+            if req.video.i == vid_id:
+                return req.num_req
+        return 0
+
     def sort_requests_by_most_pop_to_least(self, _already_called=False):
         if not _already_called:
             self.requests = sorted(self.requests,
@@ -36,10 +42,7 @@ class Endpoint:
         return best
 
     def vid_has_cached_route(self, video_obj):
-        for cache in self.caches:
-            if video_obj.i in cache.vid_ids:
-                return True
-        return False
+        return video_obj.i in self.cached_vid_ids
 
 class Request:
     def __init__(self, i, endp, r, video_obj):
@@ -54,6 +57,7 @@ class Cache:
         self.remaining = meg
         self.vids = []
         self.vid_ids = set()
+        self.endpoints = []
 
         # maps endpoint id to latency
         self.connected = {}
@@ -61,14 +65,31 @@ class Cache:
             for k, v in e.cache_lats:
                 if k == self.i:
                     self.connected[e.i] = v
+                    self.endpoints.append(e)
 
     def vid_fits(self, vid):
         return vid.meg <= self.remaining
+
+    def get_lat_saved_by_adding_vid(self, video_obj):
+        lat_saved = 0
+        for endp in self.endpoints:
+            if endp.dc_lat <= self.connected[endp.i]:
+                # No possible saving (May never be hit?)
+                continue
+            if endp.vid_has_cached_route(video_obj):
+                continue
+            num_req = endp.num_req_for_vid(video_obj.i)
+            endp_lat_to_cache = self.connected[endp.i]
+            lat_saved += num_req * endp_lat_to_cache
+        return lat_saved
 
     def add_video(self, video_obj):
         self.vids.append(video_obj)
         self.vid_ids.add(video_obj.i)
         self.remaining -= video_obj.meg
+        for endp in self.endpoints:
+            # Marks a vid, even if the vid isn't needed at this endpoint
+            endp.mark_vid_as_cached(video_obj.i)
 
 def read():
     V, E, R, C, X = map(int, input().split())

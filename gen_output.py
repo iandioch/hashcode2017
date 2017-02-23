@@ -3,9 +3,9 @@ import os
 import subprocess
 
 inputs = [
-    'inputs/me_at_the_zoo.in',
+#    'inputs/me_at_the_zoo.in',
     'inputs/trending_today.in',
-    'inputs/videos_worth_spreading.in',
+#    'inputs/videos_worth_spreading.in',
     'inputs/kittens.in',
 ]
 

@@ -12,12 +12,17 @@ if __name__ == '__main__':
                 if endp.vid_has_cached_route(req.video):
                     continue
                 # Find a cache to fit this vid
-                for cache in endp.get_caches_sorted_by_lowest_lat():
+                caches_best_to_worst = sorted(
+                    endp.caches.keys(),
+                    key=lambda c: c.get_lat_saved_by_adding_vid(req.video),
+                    reverse=True)
+                for cache in caches_best_to_worst:
                     if cache.vid_fits(req.video):
                         cache.add_video(req.video)
                         caches_full = False
                         break
                 break
+
     print(len([c for c in caches if len(c.vids)]))
     for cache in caches:
         if len(cache.vids) == 0:

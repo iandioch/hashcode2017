@@ -34,6 +34,8 @@ class Cache:
         self.remaining = meg
         self.vids = []
         self.vid_ids = set()
+
+        # maps endpoint id to latency
         self.connected = {}
         for e in endpoints:
             for k, v in e.cache_lats:

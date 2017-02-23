@@ -3,8 +3,8 @@ import os
 import subprocess
 
 inputs = [
-    'inputs/kittens.in',
     'inputs/me_at_the_zoo.in',
+    'inputs/kittens.in',
     'inputs/trending_today.in',
     'inputs/videos_worth_spreading.in',
 ]

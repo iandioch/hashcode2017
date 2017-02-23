@@ -13,10 +13,20 @@ class Endpoint:
         self.requests = []
         # maps connected cache object to latency
         self.caches = {}
-        self.cached_vid_ids = set()
+        self.cached_vid_ids = {}
 
-    def mark_vid_as_cached(self, vid_id):
-        self.cached_vid_ids.add(vid_id)
+    def mark_vid_as_cached(self, vid_id, lat):
+        self.cached_vid_ids[vid_id] = lat
+
+    def get_wanted_vids(self, lat_to_cache):
+        wanted = {}
+        for req in self.requests:
+            if req.video.i not in self.cached_vid_ids:
+                wanted[req.video] = req.num_req * (self.dc_lat - lat_to_cache)
+            else:
+                if lat_to_cache < self.cached_vid_ids[req.video.i]:
+                    wanted[req.video] = req.num_req * (self.cached_vid_ids[req.video.i] - lat_to_cache)
+        return wanted
 
     def num_req_for_vid(self, vid_id):
         for req in self.requests:
@@ -89,7 +99,7 @@ class Cache:
         self.remaining -= video_obj.meg
         for endp in self.endpoints:
             # Marks a vid, even if the vid isn't needed at this endpoint
-            endp.mark_vid_as_cached(video_obj.i)
+            endp.mark_vid_as_cached(video_obj.i, self.connected[endp.i])
 
 def read():
     V, E, R, C, X = map(int, input().split())
